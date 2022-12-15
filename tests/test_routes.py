@@ -124,3 +124,39 @@ class TestAccountService(TestCase):
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
     # ADD YOUR TEST CASES HERE ...
+    def test_get_accounts(self):
+        accounts = self._create_accounts(5)
+        response = self.client.get(BASE_URL)
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(len(existing_accounts), len(accounts))
+        for index in range(len(accounts)):
+            self.assertEqual(existing_accounts[index]["id"], accounts[index].id)
+
+    def test_get_account(self):
+        accounts = self._create_accounts(2)
+        response = self.client.get('{url}/{id}'.format(url=BASE_URL, id=accounts[0].id))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        found_account = response.get_json()
+        self.assertEqual(found_account["id"], accounts[0].id)
+
+    def test_update_account(self):
+        account = self._create_accounts(1)
+        new_account = AccountFactory()
+        response = self.client.put('{url}/{id}'.format(url=BASE_URL, id=account[0].id), json=new_account.serialize())
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        updated_account = response.get_json()
+        self.assertEqual(updated_account["id"],account[0].id)
+        self.assertEqual(updated_account["name"],new_account.name)
+        self.assertEqual(updated_account["email"],new_account.email)
+        self.assertEqual(updated_account["address"],new_account.address)
+        self.assertEqual(updated_account["phone_number"],new_account.phone_number)
+        self.assertEqual(updated_account["date_joined"], str(new_account.date_joined))
+
+    def test_delete_account(self):
+        account = self._create_accounts(1)
+        response = self.client.delete('{url}/{id}'.format(url=BASE_URL, id=account[0].id))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        response = self.client.get('{url}/{id}'.format(url=BASE_URL, id=account[0].id))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
