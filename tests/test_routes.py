@@ -126,23 +126,32 @@ class TestAccountService(TestCase):
     # ADD YOUR TEST CASES HERE ...
     def test_get_accounts(self):
         """It should return all accounts"""
+        response = self.client.get(BASE_URL)
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
         accounts = self._create_accounts(5)
         response = self.client.get(BASE_URL)
+        existing_accounts = response.get_json()
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(len(existing_accounts), len(accounts))
         for index in range(len(accounts)):
             self.assertEqual(existing_accounts[index]["id"], accounts[index].id)
 
-    def test_get_account(self):
+    def test_read_an_account(self):
         """It should return an account given its id"""
-        accounts = self._create_accounts(2)
+        response = self.client.get('{url}/{id}'.format(url=BASE_URL, id=0))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        accounts = self._create_accounts(1)
         response = self.client.get('{url}/{id}'.format(url=BASE_URL, id=accounts[0].id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         found_account = response.get_json()
-        self.assertEqual(found_account["id"], accounts[0].id)
+        self.assertEqual(found_account, accounts[0].serialize())
 
     def test_update_account(self):
         """It should return an account updated given its id and new data"""
+        response = self.client.get('{url}/{id}'.format(url=BASE_URL, id=0))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        
         account = self._create_accounts(1)
         new_account = AccountFactory()
         response = self.client.put('{url}/{id}'.format(url=BASE_URL, id=account[0].id), json=new_account.serialize())
@@ -160,7 +169,5 @@ class TestAccountService(TestCase):
         account = self._create_accounts(1)
         response = self.client.delete('{url}/{id}'.format(url=BASE_URL, id=account[0].id))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        response = self.client.get('{url}/{id}'.format(url=BASE_URL, id=account[0].id))
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
