@@ -125,6 +125,7 @@ class TestAccountService(TestCase):
 
     # ADD YOUR TEST CASES HERE ...
     def test_get_accounts(self):
+        """It should return all accounts"""
         accounts = self._create_accounts(5)
         response = self.client.get(BASE_URL)
         self.assertEqual(status.HTTP_200_OK, response.status_code)
@@ -133,6 +134,7 @@ class TestAccountService(TestCase):
             self.assertEqual(existing_accounts[index]["id"], accounts[index].id)
 
     def test_get_account(self):
+        """It should return an account given its id"""
         accounts = self._create_accounts(2)
         response = self.client.get('{url}/{id}'.format(url=BASE_URL, id=accounts[0].id))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -140,6 +142,7 @@ class TestAccountService(TestCase):
         self.assertEqual(found_account["id"], accounts[0].id)
 
     def test_update_account(self):
+        """It should return an account updated given its id and new data"""
         account = self._create_accounts(1)
         new_account = AccountFactory()
         response = self.client.put('{url}/{id}'.format(url=BASE_URL, id=account[0].id), json=new_account.serialize())
@@ -153,6 +156,7 @@ class TestAccountService(TestCase):
         self.assertEqual(updated_account["date_joined"], str(new_account.date_joined))
 
     def test_delete_account(self):
+        """It should delete an existing account given its id"""
         account = self._create_accounts(1)
         response = self.client.delete('{url}/{id}'.format(url=BASE_URL, id=account[0].id))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
