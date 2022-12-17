@@ -149,7 +149,7 @@ class TestAccountService(TestCase):
 
     def test_update_account(self):
         """It should return an account updated given its id and new data"""
-        response = self.client.get('{url}/{id}'.format(url=BASE_URL, id=0))
+        response = self.client.put('{url}/{id}'.format(url=BASE_URL, id=0))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         
         account = self._create_accounts(1)
