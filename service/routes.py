@@ -94,11 +94,11 @@ def update_account(id):
     account = Account.find(id)
 
     if not account:
-        return make_response({},status.HTTP_404_NOT_FOUND)
+        return make_response({}, status.HTTP_404_NOT_FOUND)
 
     account.deserialize(request.get_json())
     account.update()
-    return make_response(jsonify(account.serialize()),status.HTTP_200_OK)
+    return make_response(jsonify(account.serialize()), status.HTTP_200_OK)
 
 
 ######################################################################
@@ -113,7 +113,7 @@ def delete_account(id):
 
     if account:
         account.delete()
-        return make_response("",status.HTTP_204_NO_CONTENT)
+        return make_response("", status.HTTP_204_NO_CONTENT)
 
 
 ######################################################################
