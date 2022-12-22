@@ -12,12 +12,15 @@ from tests.factories import AccountFactory
 from service.common import status  # HTTP Status Codes
 from service.models import db, Account, init_db
 from service.routes import app
+from service import talisman
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/postgres"
+    
 )
 
 BASE_URL = "/accounts"
+HTTPS_ENVIRON = {'wsgi.url_scheme': 'https'}
 
 
 ######################################################################
@@ -33,6 +36,7 @@ class TestAccountService(TestCase):
         app.config["DEBUG"] = False
         app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
         app.logger.setLevel(logging.CRITICAL)
+        talisman.force_https = False
         init_db(app)
 
     @classmethod
@@ -175,3 +179,17 @@ class TestAccountService(TestCase):
         """It should not allow an illegal method call"""
         resp = self.client.delete(BASE_URL)
         self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_secure_headers(self):
+        """It should find secure headers"""
+        result = self.client.get('/', environ_overrides=HTTPS_ENVIRON)
+        expected = {
+            'X-Frame-Options': 'SAMEORIGIN',
+            'X-XSS-Protection': '1; mode=block',
+            'X-Content-Type-Options': 'nosniff',
+            'Content-Security-Policy': 'default-src \'self\'; object-src \'none\'',
+            'Referrer-Policy': 'strict-origin-when-cross-origin',
+        }
+        self.assertEqual(result.status_code, status.HTTP_200_OK)
+        for key, value in expected.items():
+            self.assertEqual(result.headers.get(key), value)
