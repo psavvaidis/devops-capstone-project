@@ -16,7 +16,6 @@ from service import talisman
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/postgres"
-    
 )
 
 BASE_URL = "/accounts"
@@ -155,17 +154,17 @@ class TestAccountService(TestCase):
         """It should return an account updated given its id and new data"""
         response = self.client.put('{url}/{id}'.format(url=BASE_URL, id=0))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        
+
         account = self._create_accounts(1)
         new_account = AccountFactory()
         response = self.client.put('{url}/{id}'.format(url=BASE_URL, id=account[0].id), json=new_account.serialize())
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         updated_account = response.get_json()
-        self.assertEqual(updated_account["id"],account[0].id)
-        self.assertEqual(updated_account["name"],new_account.name)
-        self.assertEqual(updated_account["email"],new_account.email)
-        self.assertEqual(updated_account["address"],new_account.address)
-        self.assertEqual(updated_account["phone_number"],new_account.phone_number)
+        self.assertEqual(updated_account["id"], account[0].id)
+        self.assertEqual(updated_account["name"], new_account.name)
+        self.assertEqual(updated_account["email"], new_account.email)
+        self.assertEqual(updated_account["address"], new_account.address)
+        self.assertEqual(updated_account["phone_number"], new_account.phone_number)
         self.assertEqual(updated_account["date_joined"], str(new_account.date_joined))
 
     def test_delete_account(self):
@@ -173,7 +172,6 @@ class TestAccountService(TestCase):
         account = self._create_accounts(1)
         response = self.client.delete('{url}/{id}'.format(url=BASE_URL, id=account[0].id))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-
 
     def test_method_not_allowed(self):
         """It should not allow an illegal method call"""
@@ -194,7 +192,7 @@ class TestAccountService(TestCase):
         for key, value in expected.items():
             self.assertEqual(result.headers.get(key), value)
 
-    def test_secure_headers(self):
+    def test_cors_policy(self):
         """It should find CORS policies established"""
         result = self.client.get('/', environ_overrides=HTTPS_ENVIRON)
         self.assertEqual(result.status_code, status.HTTP_200_OK)
